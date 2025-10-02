@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
   if (div) {
     div.textContent = i;
   }
-
   // ===================================================================
   // Skills progress
   // ===================================================================
@@ -78,4 +77,25 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+  // ===================================================================
+  let upButton = document.querySelector(".UP");
+  let progress = document.querySelector(".proggres")
+  let hight = document.documentElement.scrollHeight - document.documentElement.clientHeight
+  window.addEventListener("scroll", function () {
+    if (this.scrollY >= 700) {
+      upButton.style.display = "block"
+    } else {
+      upButton.style.display = "none"
+    }
+    let top = document.documentElement.scrollTop
+    progress.style.width = `${(top / hight) *100}%`
+
+  });
+  upButton.onclick = function () {
+    window.scrollTo({
+      top: 0,
+      behavior:"smooth"
+    })
+  }
+
 });
