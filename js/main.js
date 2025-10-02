@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateTime();
   const timer = setInterval(updateTime, 1000);
-
+  
   // ===================================================================
   // Clients counter (safe access)
   // ===================================================================
@@ -91,11 +91,16 @@ document.addEventListener('DOMContentLoaded', function () {
     progress.style.width = `${(top / hight) *100}%`
 
   });
-  upButton.onclick = function () {
-    window.scrollTo({
-      top: 0,
-      behavior:"smooth"
-    })
-  }
-
+$(upButton).click(function () {
+    $("html,body").animate({ scrollTop: 0 }, 600)
+  });
+  // ===================================================================
+  let a = $(".header a")
+  $(a).click(function (e) { 
+    e.preventDefault()
+    let href = $(this).attr("href")
+    console.log(href)
+    let offset = $(href).offset().top
+    $("html,body").animate({ scrollTop: offset }, 600)
+  })
 });
