@@ -5,12 +5,9 @@
   box-sizing: border-box;
 
   user-select: none;
-  touch-action: none;
-  -webkit-touch-callout: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  user-select: none;
 }
 :root {
   --main-color: #2196f3;
@@ -873,6 +870,7 @@ ul {
 }
 .our-skills .skill .the-progress {
   height: 30px;
+  transition: all 0.3s ease;
   background-color: #eee;
   position: relative;
 }
@@ -880,9 +878,10 @@ ul {
   position: absolute;
   left: 0;
   top: 0;
+  border-radius: 20px;
   height: 100%;
   background-color: var(--main-color);
-  transition: width 0.5s linear;
+  transition: all 0.5s linear;
 }
 /* End Skills */
 /* Start Work Steps */
@@ -1339,6 +1338,7 @@ ul {
   font-size: 50px;
   font-weight: bold;
   margin-top: 10px;
+  transition: var(--main-transition);
   margin-bottom: 10px;
 }
 .stats .box .text {

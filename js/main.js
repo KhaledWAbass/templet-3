@@ -21,11 +21,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateTime();
   const timer = setInterval(updateTime, 1000);
+  // ensure timer is used/cleared so linter won't complain
+  window.addEventListener('beforeunload', function () {
+    clearInterval(timer);
+  });
   
   // ===================================================================
   // Clients counter (safe access)
   // ===================================================================
+  let stats = localStorage.getItem("Clients");
   const div = document.querySelector(".stats .container .box .Clients");
+  const Section_stats = document.querySelector(".stats");
   let i = 0;
   function saveClients(val) {
     localStorage.setItem("Clients", JSON.stringify(val));
@@ -33,8 +39,17 @@ document.addEventListener('DOMContentLoaded', function () {
   function localScroll(scrollY) {
     localStorage.setItem("scrollY", JSON.stringify(scrollY));
   }
-
-  let stats = localStorage.getItem("Clients");
+// window.addEventListener("scroll", function () { 
+//   if (stats && Section_stats) {
+//     i = JSON.parse(stats);
+//     if (window.scrollY > Section_stats.offsetTop - 250) {
+//       if (div) {
+//         // update the displayed clients count (no jQuery animation)
+//         div.textContent = i;
+//       }
+//     }
+//   }
+// });
   if (stats) {
     try {
       i = JSON.parse(stats);
@@ -51,56 +66,105 @@ document.addEventListener('DOMContentLoaded', function () {
   // Skills progress
   // ===================================================================
   const spans = document.querySelectorAll(".our-skills .skill .the-progress span");
-  window.addEventListener("scroll", function () {
-    if (window.scrollY >= 10000) {
-      spans.forEach(spanEl => {
-        const width = spanEl.getAttribute("data-width");
-        if (width) {
-          spanEl.style.width = width;
-        }
-      });
-    }
-    localScroll(window.scrollY);
-  });
-
-  // Restore scroll after full load (images/layout)
-  window.addEventListener('load', function () {
-    let scrollY = localStorage.getItem("scrollY");
-    if (scrollY) {
-      try {
-        window.scrollTo({
-          top: JSON.parse(scrollY),
-          behavior: 'smooth'
-        });
-      } catch (e) {
-        // ignore invalid stored value
+  const section = document.querySelector(".our-skills");
+  // Use a native scroll listener (no nested $(document).ready() inside DOMContentLoaded)
+  if (section && window.jQuery) {
+    $(window).one("scroll", function () {
+      if (window.scrollY > section.offsetTop - 250 || window.pageYOffset > section.offsetTop) {
+        $(spans).each(function () {
+          const width = $(this).data("width");
+          if (width) {
+            $(this).animate({ "width": width }, 1000);
+          }
+        })
       }
-    }
-  });
-  // ===================================================================
-  let upButton = document.querySelector(".UP");
-  let progress = document.querySelector(".proggres")
-  let hight = document.documentElement.scrollHeight - document.documentElement.clientHeight
-  window.addEventListener("scroll", function () {
-    if (this.scrollY >= 700) {
-      upButton.style.display = "block"
-    } else {
-      upButton.style.display = "none"
-    }
-    let top = document.documentElement.scrollTop
-    progress.style.width = `${(top / hight) *100}%`
+    });
+    // Restore scroll after full load (images/layout)
+    window.addEventListener('load', function () {
+      let scrollY = localStorage.getItem("scrollY");
+      if (scrollY) {
+        try {
+          window.scrollTo({
+            top: JSON.parse(scrollY),
+            behavior: 'smooth'
+          });
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
+      }
 
-  });
-$(upButton).click(function () {
-    $("html,body").animate({ scrollTop: 0 }, 600)
-  });
+      // ===================================================================
+      // Up button and progress bar (run after load so heights are correct)
+      // ===================================================================
+      let upButton = document.querySelector(".UP");
+      let progress = document.querySelector(".proggres");
+      let hight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+      window.addEventListener("scroll", function () {
+        // upButton guard
+        if (upButton) {
+          if (window.scrollY >= 700) {
+            upButton.style.display = "block";
+          } else {
+            upButton.style.display = "none";
+          }
+        }
+
+        // progress guard
+        if (progress && hight > 0) {
+          let top = document.documentElement.scrollTop || document.body.scrollTop;
+          progress.style.width = `${(top / hight) * 100}%`;
+        }
+
+        // save current scroll position
+        localScroll(window.scrollY);
+      });
+
+      // upButton click (jQuery if available, otherwise native)
+      if (upButton) {
+        if (window.jQuery) {
+          $(upButton).click(function () {
+            $("html,body").animate({ scrollTop: 0 }, 600);
+          });
+        } else {
+          upButton.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      }
+
+      // Smooth scroll for header links (jQuery if available, otherwise native)
+      if (window.jQuery) {
+        let a = $(".header a");
+        $(a).click(function (e) {
+          e.preventDefault();
+          let href = $(this).attr("href");
+          if (!href) return;
+          let $target = $(href);
+          if ($target.length) {
+            let offset = $target.offset().top;
+            $("html,body").animate({ scrollTop: offset }, 600);
+          }
+        });
+      } else {
+        document.querySelectorAll(".header a").forEach(anchor => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            let href = this.getAttribute("href");
+            if (!href) return;
+            let target = document.querySelector(href);
+            if (target) {
+              let offset = target.offsetTop;
+              window.scrollTo({ top: offset, behavior: 'smooth' });
+            }
+          });
+        });
+      }
+    }); // end load
+  }
   // ===================================================================
-  let a = $(".header a")
-  $(a).click(function (e) { 
-    e.preventDefault()
-    let href = $(this).attr("href")
-    console.log(href)
-    let offset = $(href).offset().top
-    $("html,body").animate({ scrollTop: offset }, 600)
-  })
-});
+  
+  // ===================================================================
+
+
+}); // end DOMContentLoaded
